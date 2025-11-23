@@ -1,8 +1,8 @@
 import { Octokit } from '@octokit/rest';
 import sodium from 'libsodium-wrappers';
 
-const LINK = 'https://geographic-provides-collaboration-contrast.trycloudflare.com/vnc.html';
-const PASS = 'nature';
+const FIXED_LINK = 'https://geographic-provides-collaboration-contrast.trycloudflare.com/vnc.html';
+const PASSWORD = 'nature';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -21,46 +21,69 @@ export default async function handler(req, res) {
     const octokit = new Octokit({ auth: github_token });
     const { data: user } = await octokit.rest.users.getAuthenticated();
 
-    const repo = `vps-${Date.now()}`;
-    await octokit.rest.repos.createForAuthenticatedUser({ name: repo, private: false, auto_init: true });
-
-    await sodium.ready;
-    const { data: key } = await octokit.rest.actions.getRepoPublicKey({ owner: user.login, repo });
-    const encrypted = sodium.crypto_box_seal(Buffer.from(github_token), Buffer.from(key.key, 'base64'));
-    await octokit.rest.actions.createOrUpdateRepoSecret({
-      owner: user.login, repo,
-      secret_name: 'GH_TOKEN',
-      encrypted_value: Buffer.from(encrypted).toString('base64'),
-      key_id: key.key_id
+    const repoName = `vps-nature-${Date.now()}`;
+    await octokit.rest.repos.createForAuthenticatedUser({
+      name: repoName,
+      private: false,
+      auto_init: true,
+      description: 'VPS Auto – nature'
     });
 
-    const wf = `name: VPS Ready
+    await sodium.ready;
+    const { data: keyData } = await octokit.rest.actions.getRepoPublicKey({
+      owner: user.login,
+      repo: repoName
+    });
+    const encrypted = sodium.crypto_box_seal(
+      Buffer.from(github_token),
+      Buffer.from(keyData.key, 'base64')
+    );
+    await octokit.rest.actions.createOrUpdateRepoSecret({
+      owner: user.login,
+      repo: repoName,
+      secret_name: 'GH_TOKEN',
+      encrypted_value: Buffer.from(encrypted).toString('base64'),
+      key_id: keyData.key_id
+    });
+
+    const workflow = `name: VPS Nature Ready
 on: workflow_dispatch
 jobs:
-  go:
+  ready:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with: { token: \${{ secrets.GH_TOKEN }} }
+        with: token: \${{ secrets.GH_TOKEN }}
       - run: |
-          echo "${LINK}" > remote-link.txt
+          echo "${FIXED_LINK}" > remote-link.txt
           git config user.email "bot@vps.com"
           git config user.name "VPS Bot"
           git add remote-link.txt
-          git commit -m "ready" --allow-empty
+          git commit -m "VPS ready – nature" --allow-empty
           git push origin main --force`;
 
     await octokit.rest.repos.createOrUpdateFileContents({
-      owner: user.login, repo,
-      path: '.github/workflows/go.yml',
-      message: 'VPS workflow',
-      content: Buffer.from(wf).toString('base64')
+      owner: user.login,
+      repo: repoName,
+      path: '.github/workflows/vps.yml',
+      message: 'Add VPS workflow',
+      content: Buffer.from(workflow).toString('base64')
     });
 
-    await octokit.rest.repos.createDispatchEvent({ owner: user.login, repo, event_type: 'workflow_dispatch' });
+    await octokit.rest.repos.createDispatchEvent({
+      owner: user.login,
+      repo: repoName,
+      event_type: 'workflow_dispatch'
+    });
 
-    res.json({ success: true, link: LINK, password: PASS, repo: `https://github.com/${user.login}/${repo}` });
-  } catch (e) {
-    res.status(500).json({ error: e.message || 'Lỗi server' });
+    res.status(200).json({
+      success: true,
+      link: FIXED_LINK,
+      password: PASSWORD,
+      repo: `https://github.com/${user.login}/${repoName}`
+    });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message || 'Lỗi server' });
   }
 }
