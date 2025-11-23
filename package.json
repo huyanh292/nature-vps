@@ -1,9 +1,9 @@
 {
-  "name": "vps-nature-api",
+  "name": "nature-vps",
   "version": "1.0.0",
   "type": "module",
   "dependencies": {
-    "@octokit/rest": "latest",
-    "libsodium-wrappers": "latest"
+    "@octokit/rest": "^21.0.1",
+    "libsodium-wrappers": "^0.7.13"
   }
 }
