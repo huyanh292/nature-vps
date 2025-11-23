@@ -1,19 +1,22 @@
 {
-  "version": 2,
-  "builds": [
+  "rewrites": [
     {
-      "src": "api/create-vps.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/create-vps",
-      "dest": "/api/create-vps.js"
+      "source": "/api/create-vps",
+      "destination": "/api/create-vps.js"
     },
     {
-      "src": "/(.*)",
-      "dest": "/api/create-vps.js"
+      "source": "/api/(.*)",
+      "destination": "/api/create-vps.js"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
+      ]
     }
   ]
 }
