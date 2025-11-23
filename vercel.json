@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/create-vps.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/create-vps",
+      "dest": "/api/create-vps.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/api/create-vps.js"
+    }
+  ]
+}
