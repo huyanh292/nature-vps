@@ -1,8 +1,17 @@
 {
   "rewrites": [
-    { "source": "/api/create-vps", "destination": "/api/create-vps.js" },
-    { "source": "/api/(.*)", "destination": "/api/create-vps.js" },
-    { "source": "/(.*)", "destination": "/api/create-vps.js" }
+    {
+      "source": "/api/create-vps",
+      "destination": "/api/create-vps.js"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/create-vps.js"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/api/create-vps.js"
+    }
   ],
   "headers": [
     {
